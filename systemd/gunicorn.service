@@ -1,0 +1,21 @@
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+PIDFile=/run/gunicorn/pid
+User=figuresite
+Group=figuresite
+RuntimeDirectory=gunicorn
+Environment=DJANGO_SETTINGS_MODULE=figurabackend.settings_prod
+WorkingDirectory=/server/live/backend/figurabackend
+ExecStart=/server/live/backend/env/bin/gunicorn -w 4 --pid /run/gunicorn/pid   \
+          --bind unix:/tmp/figuresite.sock \
+		  figurabackend.asgi:application -k uvicorn.workers.UvicornWorker
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
